@@ -146,18 +146,21 @@ import { wnode } from '@nrkn/treescript'
 const chest = wnode({ type: 'chest', capacity: 10, used: 0, size: 12 })
 const sword = wnode({ type: 'sword', quality: 'rusty af', size: 3 })
 
-const addToChest = ( { value: ch }, { value: item } ) => {
-  if( ( ch.used + item.size ) > ch.capacity ){
+const addToContainer = ( container, item } ) => {
+  const { value: c } = container
+  const { value: i } = item
+
+  if( ( c.used + i.size ) > c.capacity ){
     return false
   }
 
-  ch.appendChild( item )
-  ch.used += item.size
+  container.appendChild( item )
+  c.used += i.size
 
   return true
 }
 
-if( !addToChest( chest, sword ) ){
+if( !addToContainer( chest, sword ) ){
   console.log( 'no room for sword' )
 }
 ```
