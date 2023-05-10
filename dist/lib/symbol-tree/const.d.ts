@@ -1,0 +1,15 @@
+export declare const C_DISCONNECTED = 1;
+export declare const C_PRECEDING = 2;
+export declare const C_FOLLOWING = 4;
+export declare const C_CONTAINS = 8;
+export declare const C_CONTAINED_BY = 16;
+export declare const I_PREV = 1;
+export declare const I_NEXT = 2;
+export declare const I_PARENT = 3;
+export declare const I_PRECEDING = 4;
+export declare const I_FOLLOWING = 5;
+export declare const A_TREE: unique symbol;
+export declare const A_ROOT: unique symbol;
+export declare const A_NEXT: unique symbol;
+export declare const A_ITERATE_FN: unique symbol;
+export declare const NEXIST = "Given object already present in tree, remove it first";
