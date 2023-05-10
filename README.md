@@ -318,7 +318,7 @@ console.log(tree.nextSibling(a) === c)
 This project is based on [symbol-tree](https://github.com/jsdom/js-symbol-tree) 
 by Joris van der Wel. The original code is licensed under the MIT License, and 
 the modified code in this project is also distributed under the same license. 
-See the [LICENSE](./src/symbol-tree/LICENSE) file in the `/src/symbol-tree` 
+See the [LICENSE](./src/lib/symbol-tree/LICENSE) file in the `/src/symbol-tree` 
 folder for the full text of the license.
 
 ## License
