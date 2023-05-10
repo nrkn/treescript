@@ -182,7 +182,6 @@ type WnodeProps<T = any> = {
   firstChild: MaybeNode
   lastChild: MaybeNode
 
-  isAttached: boolean
   hasChildren: boolean
 
   index: number
@@ -199,7 +198,6 @@ type WnodeMethods = {
   insertAfter: (newNode: Wnode, referenceNode: MaybeNode) => Wnode
   prependChild: (newNode: Wnode) => Wnode
   appendChild: (newNode: Wnode) => Wnode
-  compareTreePosition: (otherNode: Wnode) => number
   lastInclusiveDescendant: () => Wnode  
   preceding: (options?: SincdescOpts<Wnode>) => MaybeNode
   following: (options?: SincdescOpts<Wnode>) => MaybeNode

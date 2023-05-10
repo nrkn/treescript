@@ -40,9 +40,6 @@ export const wdoc = <U = {}>(utils?: WutilFactory<U>) => {
       get lastChild() {
         return tree.lastChild(node) 
       },
-      get isAttached() {
-        return tree._node(node)!.isAttached
-      },
       get hasChildren() {
         return tree.hasChildren(node)
       },
@@ -56,7 +53,7 @@ export const wdoc = <U = {}>(utils?: WutilFactory<U>) => {
         return tree.remove(node)
       },
       insertBefore(newNode, referenceNode) {
-        if (referenceNode === null) {
+        if (referenceNode === null || referenceNode === undefined) {
           return node.appendChild(newNode)
         }
 
@@ -65,7 +62,7 @@ export const wdoc = <U = {}>(utils?: WutilFactory<U>) => {
         return tree.insertBefore(referenceNode, newNode)
       },
       insertAfter(newNode, referenceNode) {
-        if (referenceNode === null) {
+        if (referenceNode === null || referenceNode === undefined) {
           return node.prependChild(newNode)
         }
 
@@ -78,9 +75,6 @@ export const wdoc = <U = {}>(utils?: WutilFactory<U>) => {
       },
       appendChild(newNode) {
         return tree.appendChild(node, newNode)
-      },
-      compareTreePosition(otherNode) {
-        return tree.compareTreePosition(node, otherNode)
       },
       lastInclusiveDescendant() {
         return tree.lastInclusiveDescendant(node)

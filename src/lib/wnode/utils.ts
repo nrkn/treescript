@@ -8,8 +8,13 @@ import {
 export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
   const utils: WnodeUtils = {
     after(...nodes) {
-      for (const n of nodes) {
-        node.insertAfter(n, node)
+      if( node.parent === null ) {
+        throw Error( 'Cannot insert after root node' )
+      }
+
+      for( let i = nodes.length - 1; i >= 0; i-- ) {
+        const n = nodes[i]
+        node.parent.insertAfter( n, node )
       }
     },
     append(...nodes) {
@@ -18,13 +23,18 @@ export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
       }
     },
     before(...nodes) {
-      for (const n of nodes) {
-        node.insertBefore(n, node)
+      if( node.parent === null ) {
+        throw Error( 'Cannot insert before root node' )
       }
+
+      for( const n of nodes ) {
+        node.parent.insertBefore( n, node )
+      }      
     },
     prepend(...nodes) {
-      for (const n of nodes) {
-        node.prependChild(n)
+      for( let i = nodes.length - 1; i >= 0; i-- ) {
+        const n = nodes[i]
+        node.prependChild( n )
       }
     },
     replaceChildren(...nodes) {
@@ -82,7 +92,7 @@ export const allIterator = function* (
 }
 
 export const isWnode = (value: any): value is Wnode =>
-  value && value[wsymbol]
+  value && value[wsymbol] !== undefined
   
 export const serialize = (
   node: Wnode,

@@ -14,7 +14,6 @@ export type WnodeProps<T = any> = {
   firstChild: MaybeNode
   lastChild: MaybeNode
 
-  isAttached: boolean
   hasChildren: boolean
 
   index: number
@@ -25,11 +24,10 @@ export type WnodeSelector = (node: Wnode) => boolean
 
 export type WnodeMethods = {
   remove: () => Wnode
-  insertBefore: (newNode: Wnode, referenceNode: MaybeNode) => Wnode
-  insertAfter: (newNode: Wnode, referenceNode: MaybeNode) => Wnode
+  insertBefore: (newNode: Wnode, referenceNode?: MaybeNode) => Wnode
+  insertAfter: (newNode: Wnode, referenceNode?: MaybeNode) => Wnode
   prependChild: (newNode: Wnode) => Wnode
   appendChild: (newNode: Wnode) => Wnode
-  compareTreePosition: (otherNode: Wnode) => number
   lastInclusiveDescendant: () => Wnode  
   preceding: (options?: SincdescOpts<Wnode>) => MaybeNode
   following: (options?: SincdescOpts<Wnode>) => MaybeNode
