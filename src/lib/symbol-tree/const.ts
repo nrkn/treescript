@@ -14,13 +14,6 @@ export const I_PARENT = 3
 export const I_PRECEDING = 4
 export const I_FOLLOWING = 5
 
-// iterator arg symbols
-
-export const A_TREE = Symbol()
-export const A_ROOT = Symbol()
-export const A_NEXT = Symbol()
-export const A_ITERATE_FN = Symbol()
-
 // errors etc
 
 export const NEXIST = 'Given object already present in tree, remove it first'

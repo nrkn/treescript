@@ -49,7 +49,7 @@ export const stree = <T extends {}>(
     return iterator<T>(
       sit,
       parent,
-      reverse ? parentNode?.lastChild! : parentNode?.firstChild!,
+      reverse ? parentNode!.lastChild : parentNode!.firstChild,
       reverse ? I_PREV : I_NEXT
     )
   }
@@ -58,7 +58,7 @@ export const stree = <T extends {}>(
     return iterator<T>(
       sit,
       value,
-      _node(value)?.previousSibling!,
+      _node(value)!.previousSibling,
       I_PREV
     )
   }
@@ -67,7 +67,7 @@ export const stree = <T extends {}>(
     return iterator<T>(
       sit,
       value,
-      _node(value)?.nextSibling!,
+      _node(value)!.nextSibling,
       I_NEXT
     )
   }

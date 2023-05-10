@@ -8,14 +8,14 @@ export const sarrays = <T extends {}>(
   const childrenToArray: Sarray<T> = (
     parent, { array = [], filter = _true, thisArg } = {}
   ) => {
-    const parentNode = _node(parent)
-    let object = parentNode?.firstChild
+    const parentNode = _node(parent)!
+    let object = parentNode.firstChild
     let index = 0
 
     while (object) {
       const node = _node(object)!
 
-      node.setCachedIndex(parentNode!, index)
+      node.setCachedIndex(parentNode, index)
 
       if (filter.call(thisArg, object)) {
         array.push(object)
@@ -38,7 +38,7 @@ export const sarrays = <T extends {}>(
         array.push(current)
       }
 
-      current = _node(current)?.parent
+      current = _node(current)!.parent
     }
 
     return array

@@ -5,7 +5,7 @@ export const sincdesc = <T extends {}>(_node: _Node<T>) => {
     let last: any
     let current = value
 
-    while (last = _node(current)?.lastChild) current = last
+    while (last = _node(current)!.lastChild) current = last
 
     return current
   }
@@ -13,17 +13,17 @@ export const sincdesc = <T extends {}>(_node: _Node<T>) => {
   const preceding: Spreceding<T> = (value, { root } = {}) => {
     if (value === root) return null
 
-    const previousSibling = _node(value)?.previousSibling
+    const previousSibling = _node(value)!.previousSibling
 
     if (previousSibling) {
       return lastInclusiveDescendant(previousSibling)
     }
 
-    return _node(value)?.parent!
+    return _node(value)!.parent
   }
 
   const following: Sfollowing<T> = (value, { root, skipChildren } = {}) => {
-    const firstChild = !skipChildren && _node(value)?.firstChild
+    const firstChild = !skipChildren && _node(value)!.firstChild
 
     if (firstChild) return firstChild
 
@@ -32,13 +32,13 @@ export const sincdesc = <T extends {}>(_node: _Node<T>) => {
     do {
       if (current === root) return null
 
-      const nextSibling = _node(current)?.nextSibling
+      const nextSibling = _node(current)!.nextSibling
 
       if (nextSibling) {
         return nextSibling
       }
 
-      current = _node(current)?.parent
+      current = _node(current)!.parent
     } while (current)
 
     return null

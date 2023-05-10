@@ -10,12 +10,12 @@ export const sindex = <T extends {}>(
   parent: Squery<T>
 ) => {
   const index = (child: T) => {
-    const childNode = _node(child)
-    const parentNode = _node(childNode?.parent)
+    const childNode = _node(child)!
+    const parentNode = _node(childNode.parent)
 
     if (!parentNode) return -1
 
-    let currentIndex = childNode?.getCachedIndex(parentNode)!
+    let currentIndex = childNode.getCachedIndex(parentNode)
 
     if (currentIndex >= 0) return currentIndex
 
@@ -23,15 +23,15 @@ export const sindex = <T extends {}>(
     let object = parentNode.firstChild
 
     if (parentNode.childIndexCachedUpTo) {
-      const cachedUpToNode = _node(parentNode?.childIndexCachedUpTo)!
-      object = cachedUpToNode?.nextSibling
+      const cachedUpToNode = _node(parentNode.childIndexCachedUpTo)!
+      object = cachedUpToNode.nextSibling
       currentIndex = cachedUpToNode.getCachedIndex(parentNode) + 1
     }
 
     while (object) {
       const node = _node(object)!
 
-      node.setCachedIndex(parentNode, currentIndex);
+      node.setCachedIndex(parentNode, currentIndex)
 
       if (object === child) {
         break
@@ -47,9 +47,9 @@ export const sindex = <T extends {}>(
   }
 
   const childrenCount = (parent: T) => {
-    const parentNode = _node(parent)
+    const parentNode = _node(parent)!
 
-    if (!parentNode?.lastChild) {
+    if (!parentNode.lastChild) {
       return 0
     }
 

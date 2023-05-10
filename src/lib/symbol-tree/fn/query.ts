@@ -4,22 +4,22 @@ export const squery = <T extends {}>(
   _node: _Node<T>
 ) => {
   const hasChildren = (value: T) =>
-    !!_node(value)?.hasChildren
+    !!_node(value)!.hasChildren
 
   const firstChild = (value: T) =>
-    _node(value)?.firstChild as T | null
+    _node(value)!.firstChild
 
   const lastChild = (value: T) =>
-    _node(value)?.lastChild as T | null
+    _node(value)!.lastChild
 
   const previousSibling = (value: T) =>
-    _node(value)?.previousSibling as T | null
+    _node(value)!.previousSibling
 
   const nextSibling = (value: T) =>
-    _node(value)?.nextSibling as T | null
+    _node(value)!.nextSibling
 
   const parent = (value: T) =>
-    _node(value)?.parent as T | null
+    _node(value)!.parent
 
   return {
     hasChildren, firstChild, lastChild, previousSibling, nextSibling, parent

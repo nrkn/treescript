@@ -1,10 +1,12 @@
 {
   "name": "@nrkn/treescript",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Hyperscript-like creation of generic trees",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "npx rimraf ./dist && tsc",
+    "test": "npm run build && npx mocha ./dist/test",
+    "coverage": "npx nyc --reporter=html --reporter=text npm test"
   },
   "repository": {
     "type": "git",
@@ -16,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/nrkn/treescript/issues"
   },
-  "homepage": "https://github.com/nrkn/treescript#readme"
+  "homepage": "https://github.com/nrkn/treescript#readme",
+  "devDependencies": {
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.1.1"
+  }
 }

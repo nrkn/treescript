@@ -1,9 +1,8 @@
 import {
-  A_TREE, A_ROOT, A_ITERATE_FN, A_NEXT,
   I_PREV, I_NEXT, I_PARENT, I_PRECEDING, I_FOLLOWING
 } from './const'
 
-import { Siteration, Stree } from './types'
+import { Siteration } from './types'
 
 export const iterator = <T extends {}>(
   tree: Siteration<T>,
@@ -12,27 +11,26 @@ export const iterator = <T extends {}>(
   iterateFunction: number
 ): IterableIterator<T> => {
   const next = () => {
-    const tree: Stree<T> = it[A_TREE]
-    const root: T = it[A_ROOT]
-    const iterateFunction = it[A_ITERATE_FN]
+    if (nextVal === null) return { done: true, value: root }
 
-    if (it[A_NEXT] === null) return { done: true, value: root }
-
-    const value = it[A_NEXT]
+    const value = nextVal
+    const result = { done: false, value }
 
     if (iterateFunction === I_PREV) {
-      it[A_NEXT] = tree._node(value)?.previousSibling
+      nextVal = tree._node(value)!.previousSibling
     } else if (iterateFunction === I_NEXT) {
-      it[A_NEXT] = tree._node(value)?.nextSibling
+      nextVal = tree._node(value)!.nextSibling
     } else if (iterateFunction === I_PARENT) {
-      it[A_NEXT] = tree._node(value)?.parent
+      nextVal = tree._node(value)!.parent
     } else if (iterateFunction === I_PRECEDING) {
-      it[A_NEXT] = tree.preceding(value, { root })
+      nextVal = tree.preceding(value, { root })
     } else if (iterateFunction === I_FOLLOWING) {
-      it[A_NEXT] = tree.following(value, { root })
+      nextVal = tree.following(value, { root })
+    } else {
+      throw Error(`Unknown iterateFunction: "${iterateFunction}"`)
     }
 
-    return { done: false, value }
+    return result
   }
 
   const it = {
@@ -40,10 +38,7 @@ export const iterator = <T extends {}>(
     [Symbol.iterator]: () => it
   }
 
-  it[A_TREE] = tree
-  it[A_ROOT] = root
-  it[A_NEXT] = firstResult
-  it[A_ITERATE_FN] = iterateFunction
+  let nextVal: any = firstResult
 
   return it
 }
