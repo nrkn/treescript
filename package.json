@@ -1,8 +1,9 @@
 {
   "name": "@nrkn/treescript",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Hyperscript-like creation of generic trees",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "npx rimraf ./dist && tsc",
     "test": "npm run build && npx mocha ./dist/test",
