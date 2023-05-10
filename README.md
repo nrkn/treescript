@@ -2,7 +2,7 @@
 
 Hyperscript-like creation of generic trees in typescript
 
-`npm install treescript`
+`npm install @nrkn/treescript`
 
 This package came about because I was really interested in how  `symbol-tree` 
 worked, so I cloned it as a learning exercise. Once it was passing the test 
@@ -53,7 +53,7 @@ The `args` can be a mix of `Partial<T>` and `Wnode`, the partials are
 applied to the initial value, and the nodes are added as children.
 
 ```js
-import { t } from 'treescript'
+import { t } from '@nrkn/treescript'
 
 const clubs = t(
   { type: 'clubs' },
@@ -86,7 +86,7 @@ and the value is the composite of all non-node arguments. Useful for
 composition, eg
 
 ```js
-import { ne } from 'treescript'
+import { ne } from '@nrkn/treescript'
 
 const feature1 = { fast: true }
 const feature2 = { shinyButtons: true }
@@ -106,7 +106,7 @@ has its initial value populated by the `create` function, so doesn't need to be
 passed in.
 
 ```js
-import { tOf } from 'treescript'
+import { tOf } from '@nrkn/treescript'
 
 const createOutfit = () => ({ type: 'outfit', hasPockets: true, name: '' })
 const createHat = () => ({ type: 'hat', hatBrimSize: 'medium', name: '' })
@@ -141,7 +141,7 @@ around `symbol-tree`
 The custom value is stored in `wnode.value`
 
 ```ts
-import { wnode } from 'treescript'
+import { wnode } from '@nrkn/treescript'
 
 const chest = wnode({ type: 'chest', capacity: 10, used: 0, size: 12 })
 const sword = wnode({ type: 'sword', quality: 'rusty af', size: 3 })
@@ -208,7 +208,7 @@ type WnodeMethods = {
 Decorate `wnode` instances with custom methods. 
 
 ```js
-import { wdoc } from 'treescript'
+import { wdoc } from '@nrkn/treescript'
 import { myCustom } from './custom'
 
 const wnode = wdoc( myCustom )
@@ -238,7 +238,7 @@ type WnodeUtils = {
 ```
 
 ```js
-import { wdoc, wnodeUtils } from 'treescript'
+import { wdoc, wnodeUtils } from '@nrkn/treescript'
 
 const wnode = wdoc( wnodeUtils )
 ```
@@ -267,7 +267,7 @@ You can only pass through a single utils object - if you want to use multiple,
 to eg extend wnodeUtils, you can do with a pattern like this:
 
 ```ts
-import { wnodeUtils, wdoc } from 'treescript'
+import { wnodeUtils, wdoc } from '@nrkn/treescript'
 
 const myUtils = node => {
   const baseUtils = wnodeUtils( node )
@@ -294,7 +294,7 @@ package, except instances are generated via `stree()` rather than
 `new SymbolTree()`
 
 ```js
-import { stree } from 'treescript'
+import { stree } from '@nrkn/treescript'
 
 const tree = stree()
 
