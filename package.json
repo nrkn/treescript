@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/nrkn/treescript.git"
   },
-  "keywords": [],
+  "keywords": [ "generic", "tree", "node" ],
   "author": "Nik Coughlin <nrkn.com@gmail.com>",
   "license": "MIT",
   "bugs": {
