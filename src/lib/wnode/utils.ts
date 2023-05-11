@@ -98,7 +98,7 @@ export const allIterator = function* <Deco extends {}>(
   }
 }
 
-export const isWnode = ( value: any ): value is WnodeAA =>
+export const isWnode = (value: any): value is WnodeAA =>
   value && value[wsymbol] !== undefined
 
 export const serialize = (
@@ -116,7 +116,7 @@ export const serialize = (
   return result
 }
 
-export const deserializeFrom = <Deco extends {}>(create: CreateWnode<Deco> ) =>
+export const deserializeFrom = <Deco extends {}>(create: CreateWnode<Deco>) =>
   (value: any[], valueTransformer?: (value: any) => any): WnodeAny<Deco> => {
     const node = create(valueTransformer ? valueTransformer(value[0]) : value[0])
 
@@ -127,4 +127,4 @@ export const deserializeFrom = <Deco extends {}>(create: CreateWnode<Deco> ) =>
     return node
   }
 
-export const deserialize = deserializeFrom( wdoc( wnodeExtra ) )
+export const deserialize = deserializeFrom(wdoc(wnodeExtra))
