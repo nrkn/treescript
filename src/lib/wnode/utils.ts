@@ -128,4 +128,3 @@ export const deserializeFrom = <Deco extends {}>(create: CreateWnode<Deco> ) =>
   }
 
 export const deserialize = deserializeFrom( wdoc( wnodeExtra ) )
-

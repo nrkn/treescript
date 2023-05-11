@@ -7,6 +7,7 @@ Hyperscript-like creation of generic trees in typescript
 ```js
 import { t, serialize } from '@nrkn/treescript'
 
+// value can be any type, strings used here for conciseness
 const carnivora = t(
   'Carnivora',
   t('Caniformia',
@@ -612,14 +613,10 @@ console.log( serialized )
     "created": "2021-08-01T00:00:00.000Z"
   },
   [
-    {
-      "id": "bar"
-    }
+    { "id": "bar" }
   ],
   [
-    {
-      "id": "baz"
-    }
+    { "id": "baz" }
   ]
 ]
 */

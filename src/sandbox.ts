@@ -67,31 +67,38 @@ console.log(JSON.stringify(serialize(roundTripped), null, 2))
 }
 
 {
-  type InheritOptions = {
-    filter: (key: string, value: any) => boolean
+  type InheritOptions<Deco extends {}> = {
+    filter: (key: string, value: any, child: WnodeAny<Deco> ) => boolean
+    deleteIf: (key: string, value: any, child: WnodeAny<Deco> ) => boolean
     mode: 'inherit' | 'overwrite'
   }
 
-  const inheritValue = <D extends {}>(
-    iterator: IterableIterator<WnodeAny<D>>,
-    node: WnodeAny<D>,
-    { filter, mode = 'inherit' } = {} as Partial<InheritOptions>
+  const inheritValue = <Deco extends {}>(
+    iterator: IterableIterator<WnodeAny<Deco>>,
+    node: WnodeAny<Deco>,
+    { filter, deleteIf, mode = 'inherit' } = {} as Partial<InheritOptions<Deco>>
   ) => {
     const computed = node.value
 
-    if( computed === null || computed === undefined ) return computed
+    if (computed === null || computed === undefined) return computed
 
     for (const child of iterator) {
       if (child === node) continue
 
       for (const key in child.value) {
-        if( mode === 'inherit' && computed[key] !== undefined ) continue
+        if (mode === 'inherit' && computed[key] !== undefined) continue
 
         const value = child.value[key]
 
-        if( value === null || value === undefined ) continue
+        if (filter && !filter(key, value, child )) continue
 
-        if (filter && !filter(key, value)) continue
+        if( mode === 'overwrite' && deleteIf && deleteIf(key, value, child )) {
+          delete computed[key]
+          
+          continue
+        }         
+
+        if (value === null || value === undefined) continue
 
         computed[key] = value
       }
@@ -107,7 +114,9 @@ console.log(JSON.stringify(serialize(roundTripped), null, 2))
         t({ name: 'Dogs' }), t({ name: 'Wolves' }), t({ name: 'Foxes' })
       ),
       t({ name: 'Ursids', family: 'ursidae' },
-        t({ name: 'Brown Bears' }), t({ name: 'Polar Bears' }), t({ name: 'Black Bears' }), t({ name: 'Pandas' })
+        t({ name: 'Brown Bears' }), t({ name: 'Polar Bears' }),
+        t({ name: 'Black Bears' }), t({ name: 'Pandas' }
+        )
       ),
       t({ name: 'Mustelids' },
         t({ name: 'Weasels' }), t({ name: 'Otters' }), t({ name: 'Badgers' })
@@ -115,29 +124,31 @@ console.log(JSON.stringify(serialize(roundTripped), null, 2))
     ),
     t({ name: 'Feliformia' },
       t({ name: 'Felids' },
-        t({ name: 'Domestic Cats' }), t({ name: 'Lions' }), t({ name: 'Tigers' }), t({ name: 'Leopards' })
+        t({ name: 'Domestic Cats' }), t({ name: 'Lions' }),
+        t({ name: 'Tigers' }), t({ name: 'Leopards' })
       ),
       t({ name: 'Hyenas' },
-        t({ name: 'Spotted Hyenas' }), t({ name: 'Striped Hyenas' }), t({ name: 'Brown Hyenas' })
+        t({ name: 'Spotted Hyenas' }), t({ name: 'Striped Hyenas' }),
+        t({ name: 'Brown Hyenas' })
       ),
       t({ name: 'Mongooses' },
         t({ name: 'Meerkats' }), t({ name: 'Banded Mongooses' })
       )
     )
-  ) 
+  )
 
   const ursids = carnivora.find(n => n.value.name === 'Ursids')!
 
   const pandaNote = { diet: 'herbivore', note: 'We know this one' }
 
-  let pandas: Wnode<any,WnodeExtra>
+  let pandas: Wnode<any, WnodeExtra>
 
-  for (const bear of ursids.children ) {
+  for (const bear of ursids.children) {
     console.log('adding todo metadata to', bear.value.name)
 
     const isPanda = bear.value.name === 'Pandas'
 
-    if( isPanda ) pandas = bear
+    if (isPanda) pandas = bear
 
     const additionalBearData = t(
       { type: 'metadata' },
