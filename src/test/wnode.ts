@@ -509,7 +509,7 @@ describe('utils', () => {
       [{ name: 'B' }, [{ name: 'C' }]],
     ];
 
-    const deserializedNode = deserialize()(serialized);
+    const deserializedNode = deserialize(serialized);
 
     assert.equal(deserializedNode.value.name, 'A');
     assert.equal(deserializedNode.firstChild!.value.name, 'B');
@@ -534,7 +534,7 @@ describe('utils', () => {
 
     assert.deepStrictEqual(serialized, expectedResult);
 
-    const deserializedNode = deserialize()(serialized, valueTransformer);
+    const deserializedNode = deserialize(serialized, valueTransformer);
 
     assert.deepStrictEqual(deserializedNode.value, { name: 'A', transformed: true });
     assert.deepStrictEqual(deserializedNode.firstChild!.value, { name: 'B', transformed: true });

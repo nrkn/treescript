@@ -1,11 +1,11 @@
 import { stree } from '../symbol-tree/tree'
 import { wsymbol } from './const'
-import { Wnode, Wdecorator, WnodeAA, WnodeAny, MaybeNode } from './types'
+import { Wnode, Wdecorator, WnodeAA, WnodeAny, CreateWnode } from './types'
 
-export const wdoc = <D extends {}>(decorator?: Wdecorator<D>) => {
-  const tree = stree<WnodeAny<D>>()
+export const wdoc = <Deco extends {}>(decorator?: Wdecorator<Deco>) => {
+  const tree = stree<WnodeAny<Deco>>()
 
-  const wnode = <T extends {}>(value: T) => {
+  const wnode: CreateWnode<Deco> = <Val extends {}>(value: Val) => {
     const node = {
       get value() {
         return value
@@ -97,7 +97,7 @@ export const wdoc = <D extends {}>(decorator?: Wdecorator<D>) => {
 
         return followingNode
       }
-    } as Wnode<any, D>
+    } as Wnode<Val, Deco>
 
     tree.initialize(node)
 
@@ -107,7 +107,7 @@ export const wdoc = <D extends {}>(decorator?: Wdecorator<D>) => {
 
     node[wsymbol] = true
 
-    return node as Wnode<T, D>
+    return node 
   }
 
   return wnode

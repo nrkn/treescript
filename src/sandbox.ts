@@ -25,7 +25,7 @@ const clubsData = serialize(clubs, value => {
 
 console.log(JSON.stringify(clubsData, null, 2))
 
-const roundTripped = deserialize()(clubsData, value => {
+const roundTripped = deserialize(clubsData, value => {
   if (value.type === 'person') {
     return value.name
   }
