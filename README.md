@@ -117,7 +117,6 @@ import {
   types
 - `T` - a factory for creating a `t` instance with a custom `createNode` 
   function, eg one that has or does not have decorators
-- `TArg` - in typescript, the type of the args passed to `t` et al
 - `wnode` - a factory function for creating `wnode` instances - the 
   default export is decorated with extra functions
 - `wdoc` - a factory function for creating a `wnode` create node factory, with
@@ -150,9 +149,10 @@ created by `ne` etc - they are all just `wnode` instances
 #### t
 
 ```ts
-type TArg<T> = Wnode | Partial<T>
+// due to the decorator, the real types are more complex, but this is the gist
+type TArg<V> = Wnode | Partial<V>
 
-const t: <T extends {}>(initial: T, ...args: TArg<T>[]) => Wnode<T>
+const t: <V extends {}>(initial: V, ...args: TArg<V>[]) => Wnode<V>
 ```
 
 The initial value sets the type of the node.
@@ -357,6 +357,9 @@ if( !addToContainer( chest, sword ) ){
 
 #### properties
 
+Note that the real types are more complex due to the use of decorators, but this
+serves for understanding the basics.
+
 ```ts
 type WnodeProps<T = any> = {
   // the value passed in eg wnode( value ) or t( value ) etc
@@ -471,9 +474,9 @@ your additional methods.
 
 Custom decorators are structured like so:
 
-```ts
-export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
-  const wnodeExtra: WnodeExtra = {
+```js
+export const wnodeExtra = node => {
+  const wnodeExtra = {
     after(...nodes) {
       for (const n of nodes) {
         node.insertAfter(n, node)
@@ -489,7 +492,7 @@ export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
 You can only pass through a single decorator object - if you want to combine 
 several, to eg extend wnodeExtra, you can do with a pattern like this:
 
-```ts
+```js
 import { wnodeExtra, wdoc } from '@nrkn/treescript'
 
 import { myCustomDecorator } from './myCustomDecorator'

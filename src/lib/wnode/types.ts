@@ -1,18 +1,18 @@
 import { SincdescOpts } from '../symbol-tree/types'
 
-export type WnodeProps<T = any> = {
+export type WnodeProps<T extends {}, D extends {}> = {
   value: T
-  children: IterableIterator<Wnode>
-  ancestors: IterableIterator<Wnode>
-  descendants: IterableIterator<Wnode>
-  previousSiblings: IterableIterator<Wnode>
-  nextSiblings: IterableIterator<Wnode>
-  
-  parent: MaybeNode
-  prev: MaybeNode
-  next: MaybeNode
-  firstChild: MaybeNode
-  lastChild: MaybeNode
+  children: IterableIterator<WnodeAny<D>>
+  ancestors: IterableIterator<WnodeAny<D>>
+  descendants: IterableIterator<WnodeAny<D>>
+  previousSiblings: IterableIterator<WnodeAny<D>>
+  nextSiblings: IterableIterator<WnodeAny<D>>
+
+  parent: MaybeNode<D>
+  prev: MaybeNode<D>
+  next: MaybeNode<D>
+  firstChild: MaybeNode<D>
+  lastChild: MaybeNode<D>
 
   hasChildren: boolean
 
@@ -20,36 +20,46 @@ export type WnodeProps<T = any> = {
   childrenCount: number
 }
 
-export type WnodeSelector = (node: Wnode) => boolean
+export type WnodeSelector = <D extends {}>(node: WnodeAny<D>) => boolean
 
-export type WnodeMethods = {
-  remove: () => Wnode
-  insertBefore: (newNode: Wnode, referenceNode?: MaybeNode) => Wnode
-  insertAfter: (newNode: Wnode, referenceNode?: MaybeNode) => Wnode
-  prependChild: (newNode: Wnode) => Wnode
-  appendChild: (newNode: Wnode) => Wnode
-  lastInclusiveDescendant: () => Wnode  
-  preceding: (options?: SincdescOpts<Wnode>) => MaybeNode
-  following: (options?: SincdescOpts<Wnode>) => MaybeNode
+export type WnodeMethods<T extends {}, D extends {}> = {
+  remove: () => Wnode<T, D>
+  insertBefore: <A extends {}>(
+    newNode: Wnode<A, D>, referenceNode?: MaybeNode<D>
+  ) => Wnode<A, D>
+  insertAfter: <A extends {}>(
+    newNode: Wnode<A, D>, referenceNode?: MaybeNode<D>
+  ) => Wnode<A, D>
+  prependChild: <A extends {}>(newNode: Wnode<A, D>) => Wnode<A, D>
+  appendChild: <A extends {}>(newNode: Wnode<A, D>) => Wnode<A, D>
+  lastInclusiveDescendant: () => WnodeAny<D>
+  preceding: (options?: SincdescOpts<WnodeAny<D>>) => MaybeNode<D>
+  following: (options?: SincdescOpts<WnodeAny<D>>) => MaybeNode<D>
 }
 
 export type WnodeExtra = {
-  after: (...nodes: Wnode[]) => void
-  append: (...nodes: Wnode[]) => void
-  before: (...nodes: Wnode[]) => void
-  prepend: (...nodes: Wnode[]) => void
+  after: (...nodes: WnodeAny<WnodeExtra>[]) => void
+  append: (...nodes: WnodeAny<WnodeExtra>[]) => void
+  before: (...nodes: WnodeAny<WnodeExtra>[]) => void
+  prepend: (...nodes: WnodeAny<WnodeExtra>[]) => void
 
-  replaceChildren: (...nodes: Wnode[]) => void
-  replaceWith: (...nodes: Wnode[]) => void
+  replaceChildren: (...nodes: WnodeAny<WnodeExtra>[]) => void
+  replaceWith: (...nodes: WnodeAny<WnodeExtra>[]) => void
 
-  ancestor: (selector: WnodeSelector) => MaybeNode
-  find: (selector: WnodeSelector) => MaybeNode
-  all: (selector: WnodeSelector) => IterableIterator<Wnode>
+  ancestor: (selector: WnodeSelector) => WnodeAny<WnodeExtra>
+  find: (selector: WnodeSelector) => MaybeNode<WnodeExtra>
+  all: (selector: WnodeSelector) => IterableIterator<Wnode<any, WnodeExtra>>
   matches: (selector: WnodeSelector) => boolean
 }
 
-export type Wnode<T = any> = Readonly<WnodeProps<T>> & WnodeMethods
+export type Wnode<T extends {}, D extends {}> = (
+  Readonly<WnodeProps<T, D>> & WnodeMethods<T, D> & D
+)
 
-export type MaybeNode = Wnode | null
+export type WnodeAny<D extends {}> = Wnode<any, D>
 
-export type Wdecorator<T> = ( node: Wnode ) => T
+export type WnodeAA = WnodeAny<any>
+
+export type MaybeNode<D extends {}> = WnodeAny<D> | null
+
+export type Wdecorator<D> = (node: WnodeAny<any>) => D

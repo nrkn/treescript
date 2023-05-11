@@ -1,4 +1,5 @@
 import { serialize, deserialize, t, wnode } from '.'
+import { Wnode, WnodeAny, WnodeExtra } from './lib/wnode/types'
 
 const clubs = t(
   { type: 'clubs' },
@@ -35,7 +36,7 @@ const roundTripped = deserialize()(clubsData, value => {
 console.log(JSON.stringify(serialize(roundTripped), null, 2))
 
 {
-  
+
   const parent = wnode('parent')
   const a = wnode('a')
   const aa = wnode('aa')
@@ -47,7 +48,7 @@ console.log(JSON.stringify(serialize(roundTripped), null, 2))
 
   console.log(b === aa.following())
 
-  console.log( JSON.stringify(serialize(parent), null, 2))
+  console.log(JSON.stringify(serialize(parent), null, 2))
 }
 
 {
@@ -58,9 +59,102 @@ console.log(JSON.stringify(serialize(roundTripped), null, 2))
   a.appendChild(b)
   b.appendChild(c)
 
-  console.log( serialize(a))
+  console.log(serialize(a))
 
   a.appendChild(c)
 
-  console.log( serialize(a))
+  console.log(serialize(a))
+}
+
+{
+  type InheritOptions = {
+    filter: (key: string, value: any) => boolean
+    mode: 'inherit' | 'overwrite'
+  }
+
+  const inheritValue = <D extends {}>(
+    iterator: IterableIterator<WnodeAny<D>>,
+    node: WnodeAny<D>,
+    { filter, mode = 'inherit' } = {} as Partial<InheritOptions>
+  ) => {
+    const computed = node.value
+
+    if( computed === null || computed === undefined ) return computed
+
+    for (const child of iterator) {
+      if (child === node) continue
+
+      for (const key in child.value) {
+        if( mode === 'inherit' && computed[key] !== undefined ) continue
+
+        const value = child.value[key]
+
+        if( value === null || value === undefined ) continue
+
+        if (filter && !filter(key, value)) continue
+
+        computed[key] = value
+      }
+    }
+
+    return computed
+  }
+
+  const carnivora = t(
+    { name: 'Carnivora', complete: false },
+    t({ name: 'Caniformia', habitat: 'land' },
+      t({ name: 'Canids' },
+        t({ name: 'Dogs' }), t({ name: 'Wolves' }), t({ name: 'Foxes' })
+      ),
+      t({ name: 'Ursids', family: 'ursidae' },
+        t({ name: 'Brown Bears' }), t({ name: 'Polar Bears' }), t({ name: 'Black Bears' }), t({ name: 'Pandas' })
+      ),
+      t({ name: 'Mustelids' },
+        t({ name: 'Weasels' }), t({ name: 'Otters' }), t({ name: 'Badgers' })
+      )
+    ),
+    t({ name: 'Feliformia' },
+      t({ name: 'Felids' },
+        t({ name: 'Domestic Cats' }), t({ name: 'Lions' }), t({ name: 'Tigers' }), t({ name: 'Leopards' })
+      ),
+      t({ name: 'Hyenas' },
+        t({ name: 'Spotted Hyenas' }), t({ name: 'Striped Hyenas' }), t({ name: 'Brown Hyenas' })
+      ),
+      t({ name: 'Mongooses' },
+        t({ name: 'Meerkats' }), t({ name: 'Banded Mongooses' })
+      )
+    )
+  ) 
+
+  const ursids = carnivora.find(n => n.value.name === 'Ursids')!
+
+  const pandaNote = { diet: 'herbivore', note: 'We know this one' }
+
+  let pandas: Wnode<any,WnodeExtra>
+
+  for (const bear of ursids.children ) {
+    console.log('adding todo metadata to', bear.value.name)
+
+    const isPanda = bear.value.name === 'Pandas'
+
+    if( isPanda ) pandas = bear
+
+    const additionalBearData = t(
+      { type: 'metadata' },
+      t({ key: 'weight', value: 0, note: 'Todo - update weight' }),
+      t({ key: 'height', value: 0, note: 'Todo - update height' }),
+      t(
+        { key: 'diet', value: '', note: '' },
+        isPanda ? pandaNote : { note: 'Todo - update diet' }
+      )
+    )
+
+    bear.append(additionalBearData)
+  }
+
+  const fromUrsidDesc = inheritValue(ursids.descendants, ursids)
+  const fromPandaAnc = inheritValue(pandas!.ancestors, pandas!)
+
+  console.log('fromUrsidDesc', fromUrsidDesc)
+  console.log('fromPandaAnc', fromPandaAnc)
 }

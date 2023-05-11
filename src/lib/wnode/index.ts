@@ -1,12 +1,12 @@
 import { stree } from '../symbol-tree/tree'
 import { wsymbol } from './const'
-import { Wnode, Wdecorator } from './types'
+import { Wnode, Wdecorator, WnodeAA, WnodeAny, MaybeNode } from './types'
 
-export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
-  const tree = stree<Wnode>()
+export const wdoc = <D extends {}>(decorator?: Wdecorator<D>) => {
+  const tree = stree<WnodeAny<D>>()
 
-  const wnode = <T>(value: T) => {
-    const node: Wnode<T> = {
+  const wnode = <T extends {}>(value: T) => {
+    const node = {
       get value() {
         return value
       },
@@ -26,19 +26,19 @@ export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
         return tree.nextSiblingsIterator(node)
       },
       get parent() {
-        return tree.parent(node) 
+        return tree.parent(node)
       },
       get prev() {
-        return tree.previousSibling(node) 
+        return tree.previousSibling(node)
       },
       get next() {
-        return tree.nextSibling(node) 
+        return tree.nextSibling(node)
       },
       get firstChild() {
-        return tree.firstChild(node) 
+        return tree.firstChild(node)
       },
       get lastChild() {
-        return tree.lastChild(node) 
+        return tree.lastChild(node)
       },
       get hasChildren() {
         return tree.hasChildren(node)
@@ -59,7 +59,7 @@ export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
 
         assertReferenceHasParent(referenceNode, node)
 
-        if( newNode.parent ) newNode.remove()
+        if (newNode.parent) newNode.remove()
 
         return tree.insertBefore(referenceNode, newNode)
       },
@@ -70,18 +70,18 @@ export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
 
         assertReferenceHasParent(referenceNode, node)
 
-        if( newNode.parent ) newNode.remove()
+        if (newNode.parent) newNode.remove()
 
         return tree.insertAfter(referenceNode, newNode)
       },
       prependChild(newNode) {
-        if( newNode.parent ) newNode.remove()
+        if (newNode.parent) newNode.remove()
 
         return tree.prependChild(node, newNode)
       },
       appendChild(newNode) {
-        if( newNode.parent ) newNode.remove()
-        
+        if (newNode.parent) newNode.remove()
+
         return tree.appendChild(node, newNode)
       },
       lastInclusiveDescendant() {
@@ -89,30 +89,31 @@ export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
       },
       preceding(options) {
         const precedingNode = tree.preceding(node, options)
+
         return precedingNode
       },
       following(options) {
         const followingNode = tree.following(node, options)
-        
+
         return followingNode
       }
-    }
+    } as Wnode<any, D>
 
     tree.initialize(node)
 
-    if ( typeof decorator === 'function') {
+    if (typeof decorator === 'function') {
       Object.assign(node, decorator(node))
     }
 
-    node[ wsymbol ] = true
+    node[wsymbol] = true
 
-    return node as Wnode<T> & U
+    return node as Wnode<T, D>
   }
 
   return wnode
 }
 
-const assertReferenceHasParent = (referenceNode: Wnode, parentNode: Wnode) => {
+const assertReferenceHasParent = (referenceNode: WnodeAA, parentNode: WnodeAA) => {
   if (referenceNode.parent !== parentNode) {
     throw Error('referenceNode is not a child of node')
   }

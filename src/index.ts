@@ -1,6 +1,7 @@
 import { wdoc } from './lib/wnode'
 import { wnodeExtra } from './lib/wnode/utils'
 import { T, TArg } from './lib/t'
+import { WnodeExtra } from './lib/wnode/types'
 
 export { serialize, deserialize, wnodeExtra } from './lib/wnode/utils'
 export { wdoc } from './lib/wnode'
@@ -11,7 +12,7 @@ export const wnode = wdoc(wnodeExtra)
 
 export const t = T(wnode)
 
-export const ne = (...args: TArg<any>[]) => t({}, ...args)
+export const ne = (...args: TArg<any,WnodeExtra>[]) => t({}, ...args)
 
 export const tOf = <T extends {}>(createDefault: () => T) =>
-  (...args: TArg<T>[]) => t(createDefault(), ...args)
+  (...args: TArg<T,WnodeExtra>[]) => t(createDefault(), ...args)

@@ -2,39 +2,44 @@ import { wdoc } from '.'
 import { wsymbol } from './const'
 
 import {
-  MaybeNode, Wnode, WnodeSelector, WnodeExtra, Wdecorator
+  Wnode, WnodeSelector, WnodeExtra, Wdecorator, WnodeAny, WnodeAA
 } from './types'
 
-export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
+export const wnodeExtra: Wdecorator<WnodeExtra> = <T extends {}, D extends {}>(
+  node: Wnode<T, D>
+) => {
+  const dnode = node as unknown as Wnode<T, WnodeExtra>
+
   const extra: WnodeExtra = {
     after(...nodes) {
-      if( node.parent === null ) {
-        throw Error( 'Cannot insert after root node' )
+      if (dnode.parent === null) {
+        throw Error('Cannot insert after root node')
       }
 
-      for( let i = nodes.length - 1; i >= 0; i-- ) {
+      for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i]
-        node.parent.insertAfter( n, node )
+        dnode.parent.insertAfter(n, dnode)
       }
     },
     append(...nodes) {
       for (const n of nodes) {
-        node.appendChild(n)
+        dnode.appendChild(n)
       }
     },
     before(...nodes) {
-      if( node.parent === null ) {
-        throw Error( 'Cannot insert before root node' )
+      if (dnode.parent === null) {
+        throw Error('Cannot insert before root node')
       }
 
-      for( const n of nodes ) {
-        node.parent.insertBefore( n, node )
-      }      
+      for (const n of nodes) {
+        dnode.parent.insertBefore(n, dnode)
+      }
     },
     prepend(...nodes) {
-      for( let i = nodes.length - 1; i >= 0; i-- ) {
+      for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i]
-        node.prependChild( n )
+
+        dnode.prependChild(n)
       }
     },
     replaceChildren(...nodes) {
@@ -49,7 +54,7 @@ export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
       node.remove()
     },
     ancestor(selector) {
-      let n: MaybeNode = node
+      let n: any = dnode
 
       while (n) {
         if (selector(n)) {
@@ -62,7 +67,7 @@ export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
       return null
     },
     find(selector) {
-      for (const n of node.descendants) {
+      for (const n of dnode.descendants) {
         if (selector(n)) {
           return n
         }
@@ -71,7 +76,7 @@ export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
       return null
     },
     all(selector) {
-      return allIterator(node.descendants, selector)
+      return allIterator(dnode.descendants, selector)
     },
     matches(selector) {
       return selector(node)
@@ -81,9 +86,9 @@ export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
   return extra
 }
 
-export const allIterator = function* (
-  it: IterableIterator<Wnode>, selector: WnodeSelector
-): IterableIterator<Wnode> {
+export const allIterator = function* <D extends {}>(
+  it: IterableIterator<WnodeAny<D>>, selector: WnodeSelector
+): IterableIterator<WnodeAny<D>> {
   for (const node of it) {
     if (selector(node)) {
       yield node
@@ -91,11 +96,13 @@ export const allIterator = function* (
   }
 }
 
-export const isWnode = (value: any): value is Wnode =>
+export const isWnode = <T extends {} = any, D extends {} = any>(
+  value: any
+): value is Wnode<T, D> =>
   value && value[wsymbol] !== undefined
-  
+
 export const serialize = (
-  node: Wnode,
+  node: WnodeAA,
   valueTransformer?: (value: any) => any
 ) => {
   const result: any = [
@@ -110,7 +117,7 @@ export const serialize = (
 }
 
 export const deserialize = (create = wdoc(wnodeExtra)) =>
-  (value: any[], valueTransformer?: (value: any) => any): Wnode => {
+  (value: any[], valueTransformer?: (value: any) => any): WnodeAA => {
     const node = create(valueTransformer ? valueTransformer(value[0]) : value[0])
 
     for (const child of value.slice(1)) {
