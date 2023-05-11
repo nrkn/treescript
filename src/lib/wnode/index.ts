@@ -59,6 +59,8 @@ export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
 
         assertReferenceHasParent(referenceNode, node)
 
+        if( newNode.parent ) newNode.remove()
+
         return tree.insertBefore(referenceNode, newNode)
       },
       insertAfter(newNode, referenceNode) {
@@ -68,12 +70,18 @@ export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
 
         assertReferenceHasParent(referenceNode, node)
 
+        if( newNode.parent ) newNode.remove()
+
         return tree.insertAfter(referenceNode, newNode)
       },
       prependChild(newNode) {
+        if( newNode.parent ) newNode.remove()
+
         return tree.prependChild(node, newNode)
       },
       appendChild(newNode) {
+        if( newNode.parent ) newNode.remove()
+        
         return tree.appendChild(node, newNode)
       },
       lastInclusiveDescendant() {

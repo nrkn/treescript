@@ -49,3 +49,18 @@ console.log(JSON.stringify(serialize(roundTripped), null, 2))
 
   console.log( JSON.stringify(serialize(parent), null, 2))
 }
+
+{
+  const a = wnode('a')
+  const b = wnode('b')
+  const c = wnode('c')
+
+  a.appendChild(b)
+  b.appendChild(c)
+
+  console.log( serialize(a))
+
+  a.appendChild(c)
+
+  console.log( serialize(a))
+}

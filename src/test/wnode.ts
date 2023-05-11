@@ -14,7 +14,7 @@ describe('Wnode', () => {
   it('with or without decorator', () => {
     const wn1 = wnode // has decorator by default
     const wn2 = wdoc() // no decorator
-    const wn3 = wdoc( wnodeExtra ) // same as wnode, but explicitly passed decorator
+    const wn3 = wdoc(wnodeExtra) // same as wnode, but explicitly passed decorator
 
     const n1 = wn1(o())
     const n2 = wn2(o())
@@ -102,6 +102,33 @@ describe('Wnode', () => {
     assert.throws(() => {
       na.insertAfter(nb, nd) // nd is not a child of na
     })
+  })
+
+  it('moves nodes between parents', () => {
+    const a = wnode('a')
+    const b = wnode('b')
+    const c = wnode('c')
+
+    a.appendChild(b)
+    b.appendChild(c)
+
+    assert.deepEqual( [ 'a', [ 'b', [ 'c' ] ] ], serialize(a) )
+
+    a.appendChild(c)
+
+    assert.deepEqual( [ 'a', [ 'b' ], [ 'c' ] ], serialize(a) )
+
+    a.prependChild(c)
+
+    assert.deepEqual( [ 'a', [ 'c' ], [ 'b' ] ], serialize(a) )
+
+    a.insertAfter(c, b)
+
+    assert.deepEqual( [ 'a', [ 'b' ], [ 'c' ] ], serialize(a) )
+
+    a.insertBefore(c, b)
+
+    assert.deepEqual( [ 'a', [ 'c' ], [ 'b' ] ], serialize(a) )
   })
 
   it('lastInclusiveDescendant', () => {
@@ -517,7 +544,7 @@ describe('utils', () => {
   it('isWnode correctly identifies Wnode instances', () => {
     const a = wnode({ name: 'A' });
     const nonWnode = { value: { name: 'Non-Wnode' } };
-  
+
     assert.equal(isWnode(a), true);
     assert.equal(isWnode(nonWnode), false);
   });

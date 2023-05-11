@@ -1,6 +1,6 @@
 {
   "name": "@nrkn/treescript",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Hyperscript-like creation of generic trees",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
