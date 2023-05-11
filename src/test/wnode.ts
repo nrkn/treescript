@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { wnode, wdoc, wnodeUtils, serialize, deserialize } from '..'
+import { wnode, wdoc, wnodeExtra, serialize, deserialize } from '..'
 import { isWnode } from '../lib/wnode/utils';
 
 function o() {
@@ -11,10 +11,10 @@ function o() {
 }
 
 describe('Wnode', () => {
-  it('with or without utils', () => {
-    const wn1 = wnode // has utils by default
-    const wn2 = wdoc() // no utils
-    const wn3 = wdoc( wnodeUtils ) // same as wnode, but explicitly passed utils
+  it('with or without decorator', () => {
+    const wn1 = wnode // has decorator by default
+    const wn2 = wdoc() // no decorator
+    const wn3 = wdoc( wnodeExtra ) // same as wnode, but explicitly passed decorator
 
     const n1 = wn1(o())
     const n2 = wn2(o())
@@ -262,7 +262,7 @@ describe('Wnode', () => {
   });
 })
 
-describe('wnodeUtils', () => {
+describe('wnodeExtra', () => {
   it('insert nodes after the current node', () => {
     const parent = wnode(o());
     const a = wnode(o());
@@ -459,7 +459,7 @@ describe('wnodeUtils', () => {
   });
 })
 
-describe('other utils', () => {
+describe('utils', () => {
   it('serialize method correctly serializes the node structure', () => {
     const a = wnode({ name: 'A' });
     const b = wnode({ name: 'B' });

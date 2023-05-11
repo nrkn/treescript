@@ -4,11 +4,72 @@ Hyperscript-like creation of generic trees in typescript
 
 `npm install @nrkn/treescript`
 
-This package came about because I was really interested in how  `symbol-tree` 
-worked, so I cloned it as a learning exercise. Once it was passing the test 
-suite for real `symbol-tree`, I ended up building the other parts on top of that 
-as I wanted something as concise, readable and composable as hyperscript, but
-for generic tree nodes of varying kinds. 
+```js
+import { t, serialize } from '@nrkn/treescript'
+
+const carnivora = t(
+  'Carnivora',
+  t('Caniformia',
+    t('Canids',
+      t('Dogs'), t('Wolves'), t('Foxes')
+    ),
+    t('Ursids',
+      t('Brown Bears'), t('Polar Bears'), t('Black Bears'), t('Pandas')
+    ),
+    t('Mustelids',
+      t('Weasels'), t('Otters'), t('Badgers')
+    )
+  ),
+  t('Feliformia',
+    t('Felids',
+      t('Domestic Cats'), t('Lions'), t('Tigers'), t('Leopards')
+    ),
+    t('Hyenas',
+      t('Spotted Hyenas'), t('Striped Hyenas'), t('Brown Hyenas')
+    ),
+    t('Mongooses',
+      t('Meerkats'), t('Banded Mongooses')
+    )
+  )
+)
+
+/* 
+  don't do this, it will throw, string trees expect nothing but nodes after the 
+  initial value
+
+  t( 'a', 'b' )
+*/
+
+const ursids = carnivora.find( n => n.value === 'Ursids' )
+
+const pandaNote = { value: 'herbivore', note: 'We know this one' }
+
+for( const bear of ursids.children ){
+  console.log( 'adding todo metadata to', bear.value )
+
+  // don't have to be strings - they were just clear and concise above
+  const additionalBearData = t(
+    { type: 'metadata' },
+    t( { key: 'weight', value: 0, note: 'Todo - update weight' } ),
+    t( { key: 'height', value: 0, note: 'Todo - update height' } ),
+    t( 
+      { key: 'diet', value: '', note: '' },
+
+      // if it's an object tree, we can pass partial objects as well as nodes
+      bear.value === 'Pandas' ? pandaNote : { note: 'Todo - update diet' }
+
+      // in typescript, the type is inferred from the initial value, so all
+      // potential properties must be present for partials to work. javascript
+      // doesn't care, but you'll get a runtime error if you try mix eg
+      // strings and objects within the same node
+    )
+  )
+
+  bear.append( additionalBearData )
+}
+
+console.log( serialize( ursids ) )
+```
 
 ## Contents
 
@@ -17,11 +78,13 @@ for generic tree nodes of varying kinds.
     - [t](#t)
     - [ne](#ne)
     - [tOf](#tof)
+    - [T](#t-1)
   - [wnode](#wnode)
     - [properties](#properties)
     - [methods](#methods)
-    - [utils](#utils)
+    - [decorator](#decorator)
   - [stree](#stree)
+  - [utils](#utils)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 
@@ -35,9 +98,54 @@ We have three levels of abstraction:
 3. Low - stree - a [symbol-tree](https://github.com/jsdom/js-symbol-tree) clone, 
    backing for wnode
 
+The default exports from the module are:
+
+```js
+import { 
+  t, ne, tOf, T, wnode, wdoc, wnodeExtra, stree, serialize, deserialize, isWnode 
+} from '@nrkn/treescript'
+```
+
+- `t` - primary hyperscript-like factory for creating typed `wnode` instances
+  (in typescript - see notes below about javascript) - the default exported `t`
+  (and `ne` and `tOf`) creates `wnode` instances that are pre-decorated with 
+  extra functions, see below
+- `ne` - factory for creating `wnode` instances with an `any` type, for 
+  composition
+- `tOf` - factory for creating `t` factories bound to an initial value returned
+  by a `create` function - useful for concisely creating nodes of different 
+  types
+- `T` - a factory for creating a `t` instance with a custom `createNode` 
+  function, eg one that has or does not have decorators
+- `TArg` - in typescript, the type of the args passed to `t` et al
+- `wnode` - a factory function for creating `wnode` instances - the 
+  default export is decorated with extra functions
+- `wdoc` - a factory function for creating a `wnode` create node factory, with
+  no extra decoration, or custom decoration
+- `wnodeExtra` - a decorator for `wnode` instances, contains the extra functions
+  which decorate many of the default exports
+- `stree` - `symbol-tree` clone, used by `wnode` instances
+- `serialize`, `deserialize` - functions for serializing and deserializing 
+  `wnode` instances
+- `isWnode` - a type guard predicate for `wnode` instances 
+
+A brief description of how the parts are created and how they relate to each
+other, if you want to customize or override behaviour, at any level:
+
+- tOf is backed by t
+- ne is backed by t
+- t is backed by T
+- T is backed by wnode
+- wnode is backed by wdoc
+- wdoc is backed by stree
+
 ### treescript
 
 Create `wnode` instances with a hyperscript-like syntax. More on `wnode` later.
+
+There are three factories provided for creating nodes, the nodes created by them
+can be used interchangeably, eg you can append a node created by `t` to a node
+created by `ne` etc - they are all just `wnode` instances
 
 #### t
 
@@ -78,6 +186,39 @@ for( const person of people ){
   console.log( person.value )
 }
 ```
+
+In typescript, the initial value *must* provide the full value for the type if
+using inference, eg, this works:
+
+```ts
+t({ type: 'foo', name: '' }, { name: 'bar' } )
+```
+
+And this fails:
+
+```ts
+t({ type: 'foo' }, { name: 'bar' } )
+```
+
+```
+Argument of type '{ name: string; }' is not assignable to parameter of type 
+'TArg<{ type: string; }>'.
+  Object literal may only specify known properties, and 'name' does not exist in 
+  type 'TArg<{ type: string; }>'.ts(2345)
+```
+
+You can compose using partial types if you use `ne`, see below, or, you can
+explicitly set the type as Partial, eg:
+
+```ts
+type MyType = { type: string, name: string }
+
+const p = t<Partial<MyType>>({ type: 'foo' }, { name: 'bar' } )
+```
+
+In javascript, provided your developement environment doesn't enforce typescript
+types, you can use `t` in the same way as `ne` below, the run time behaviour is
+the same.
 
 #### ne
 
@@ -132,6 +273,55 @@ const myOutfit = outfit(
 
 ```
 
+#### T
+
+`T` is a factory function that creates a `t` function, where nodes are created
+using the passed in `create` function. 
+
+You can use this when:
+
+- you want to use the decorate capability of `wnode` (see below), so you have
+  a custom wnode you want to use
+- you want to wrap an instance of wnode in a function that modifies it in some
+  way, or adds logging etc
+
+```ts
+const T: (createNode: <N>(value: N) => Wnode<N>) => 
+  <T extends {}>(initial: T, ...args: TArg<T>[]) => Wnode<T>
+```  
+
+```js
+import { T, wdoc, wnode } from '@nrkn/treescript'
+
+const myCustomDecorator = { /* see below */ }
+
+const create = wdoc( myCustomDecorator )
+
+const t = T( create )
+
+const myDoc = t(
+  { type: 'doc' },
+  t( { type: 'section' }, t( 'section 1' ) ),
+  t( { type: 'section' }, t( 'section 2' ) )
+)
+
+// or:
+
+const myCreate = value => {
+  console.log( 'creating a node with value:', value )
+
+  return wnode( value )
+}
+
+const t2 = T( myCreate )
+
+const myDoc2 = t2(
+  { type: 'doc' },
+  t2( { type: 'section' }, t2( 'section 1' ) ),
+  t2( { type: 'section' }, t2( 'section 2' ) )
+)
+```
+
 ### wnode
 
 The backing node for `treescript` is `wnode`, which is similar to a DOM node in
@@ -169,22 +359,35 @@ if( !addToContainer( chest, sword ) ){
 
 ```ts
 type WnodeProps<T = any> = {
+  // the value passed in eg wnode( value ) or t( value ) etc
   value: T
+  // iterator of child nodes
   children: IterableIterator<Wnode>
+  // iterator of ancestor nodes - includes self
   ancestors: IterableIterator<Wnode>
+  // iterator of descendant nodes - includes self
   descendants: IterableIterator<Wnode>
+  // iterator of previous sibling nodes
   previousSiblings: IterableIterator<Wnode>
+  // iterator of next sibling nodes
   nextSiblings: IterableIterator<Wnode>
   
-  parent: MaybeNode // Wnode | null
+  // the parent node, if any
+  parent: MaybeNode // MaybeNode = Wnode | null
+  // the previous sibling node, if any
   prev: MaybeNode
+  // the next sibling node, if any
   next: MaybeNode
+  // the first child node, if any
   firstChild: MaybeNode
+  // the last child node, if any
   lastChild: MaybeNode
 
+  // true if the node has children
   hasChildren: boolean
-
+  // the index within parent, or -1 if no parent
   index: number
+  // the number of children
   childrenCount: number
 }
 ```
@@ -193,18 +396,37 @@ type WnodeProps<T = any> = {
 
 ```ts
 type WnodeMethods = {
+  // removes the node from its parent, if any
   remove: () => Wnode
-  insertBefore: (newNode: Wnode, referenceNode: MaybeNode) => Wnode
-  insertAfter: (newNode: Wnode, referenceNode: MaybeNode) => Wnode
+  // insert the newNode before the referenceNode - the referenceNode must be a 
+  // child of this node, or null or undefined, in which case the newNode is
+  // appended to the end of the children
+  insertBefore: (newNode: Wnode, referenceNode?: MaybeNode) => Wnode
+  // same as insertBefore, but inserts after the referenceNode
+  insertAfter: (newNode: Wnode, referenceNode?: MaybeNode) => Wnode
+  // prepends the newNode to the start of children
   prependChild: (newNode: Wnode) => Wnode
+  // appends the newNode to the end of children
   appendChild: (newNode: Wnode) => Wnode
+  // get the last node traversing the tree downwards - could be self
   lastInclusiveDescendant: () => Wnode  
+
+  // gets the previous node in a depth-first tree traversal, if any
   preceding: (options?: SincdescOpts<Wnode>) => MaybeNode
+  // gets the next node in a depth-first tree traversal, if any
   following: (options?: SincdescOpts<Wnode>) => MaybeNode
 }
+
+type SincdescOpts<T> = Partial<{
+  // must be inclusive ancestor of the returned node, or null is returned
+  root: T
+  // following only - ignores the children of the current node when traversing
+  skipChildren: boolean
+}>
+
 ```
 
-#### utils
+#### decorators
 
 Decorate `wnode` instances with custom methods. 
 
@@ -222,7 +444,7 @@ There is an example provided that adds the following useful methods:
 ```ts
 type WnodeSelector = (node: Wnode) => boolean
 
-type WnodeUtils = {
+type WnodeExtra = {
   after: (...nodes: Wnode[]) => void
   append: (...nodes: Wnode[]) => void
   before: (...nodes: Wnode[]) => void
@@ -239,19 +461,19 @@ type WnodeUtils = {
 ```
 
 ```js
-import { wdoc, wnodeUtils } from '@nrkn/treescript'
+import { wdoc, wnodeExtra } from '@nrkn/treescript'
 
-const wnode = wdoc( wnodeUtils )
+const wnode = wdoc( wnodeExtra )
 ```
 
-If you use a custom util, the instances created by `wnode` will be typed with 
+If you use a custom decorator, the instances created by `wnode` will be typed with 
 your additional methods. 
 
-Custom utils are structured like so:
+Custom decorators are structured like so:
 
 ```ts
-export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
-  const utils: WnodeUtils = {
+export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
+  const wnodeExtra: WnodeExtra = {
     after(...nodes) {
       for (const n of nodes) {
         node.insertAfter(n, node)
@@ -260,30 +482,33 @@ export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
     // etc
   }
 
-  return utils
+  return wnodeExtra
 }
 ```
 
-You can only pass through a single utils object - if you want to use multiple, 
-to eg extend wnodeUtils, you can do with a pattern like this:
+You can only pass through a single decorator object - if you want to combine 
+several, to eg extend wnodeExtra, you can do with a pattern like this:
 
 ```ts
-import { wnodeUtils, wdoc } from '@nrkn/treescript'
+import { wnodeExtra, wdoc } from '@nrkn/treescript'
 
-const myUtils = node => {
-  const baseUtils = wnodeUtils( node )
+import { myCustomDecorator } from './myCustomDecorator'
 
+const myDecorator = node => {
   return {
-    ...baseUtils,
+    ...wnodeExtra( node ),
+    
     myCustomMethod() {
       console.log( 
         `this node's value has ${ Object.keys( node.value ).length } keys` 
       )
     }
+
+    ...myCustomDecorator( node )
   }
 }
 
-const wnode = wdoc( myUtils )
+const wnode = wdoc( myDecorator )
 ```
 
 ### stree
@@ -314,7 +539,100 @@ tree.remove(b)
 console.log(tree.nextSibling(a) === c)
 ```
 
+### utils
+
+Serialize and deserialize wnodes to a plain array of value followed by children. 
+You can pass a value transformer if you plan to export to JSON and your value
+is not JSON serializable.
+
+```js
+import { t, serialize, deserialize } from '@nrkn/treescript'
+
+const tree = t(
+  'a',
+  t( 'b' ),
+  t( 'c' ),
+  t( 'd', t( 'e' ) )
+)
+
+const serialized = JSON.stringify( serialize( tree ), null, 2 )
+
+/*
+
+[
+  "a",
+  [ "b" ],
+  [ "c" ],
+  [
+    "d",
+    [ "e" ]
+  ]
+]
+
+*/
+console.log( serialized )
+
+const deserialized = deserialize( JSON.parse( serialized ) )
+
+console.log( deserialized.firstChild.value ) // 'b'
+```
+
+With transformers:
+
+```js
+import { t, serialize, deserialize } from '@nrkn/treescript'
+
+const tree = t(
+  { id: 'foo', created: new Date() },
+  t( { id: 'bar' } ),
+  t( { id: 'baz' } )
+)
+
+const serializeDate = value => {
+  if( !('created' in value) ) return value
+  
+  return { ...value, created: value.date.toJSON() }
+}
+const deserializeDate = value => {
+  if( !('created' in value) ) return value
+
+  return { ...value, created: new Date( value.created ) }
+}
+
+const serialized = JSON.stringify( serialize( tree, serializeDate ), null, 2 )
+
+console.log( serialized )
+/*
+[
+  {
+    "id": "foo",
+    "created": "2021-08-01T00:00:00.000Z"
+  },
+  [
+    {
+      "id": "bar"
+    }
+  ],
+  [
+    {
+      "id": "baz"
+    }
+  ]
+]
+*/
+
+const deserialized = deserialize( JSON.parse( serialized ), deserializeDate )
+
+console.log( deserialized.value.created instanceof Date ) // true
+```
+
 ## Acknowledgements
+
+This package came about because I was really interested in how  `symbol-tree` 
+worked, so I cloned it as a learning exercise. Once it was passing the test 
+suite for real `symbol-tree`, I ended up building the other parts on top of that 
+as I wanted something as concise, readable and composable as hyperscript, but
+for generic tree nodes of varying kinds. 
 
 This project is based on [symbol-tree](https://github.com/jsdom/js-symbol-tree) 
 by Joris van der Wel. The original code is licensed under the MIT License, and 

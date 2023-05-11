@@ -1,4 +1,4 @@
-import { serialize, deserialize, t } from '.'
+import { serialize, deserialize, t, wnode } from '.'
 
 const clubs = t(
   { type: 'clubs' },
@@ -33,3 +33,19 @@ const roundTripped = deserialize()(clubsData, value => {
 })
 
 console.log(JSON.stringify(serialize(roundTripped), null, 2))
+
+{
+  
+  const parent = wnode('parent')
+  const a = wnode('a')
+  const aa = wnode('aa')
+  const b = wnode('b')
+
+  parent.appendChild(a)
+  a.appendChild(aa)
+  parent.insertBefore(b, null)
+
+  console.log(b === aa.following())
+
+  console.log( JSON.stringify(serialize(parent), null, 2))
+}

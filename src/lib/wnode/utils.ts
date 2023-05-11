@@ -2,11 +2,11 @@ import { wdoc } from '.'
 import { wsymbol } from './const'
 
 import {
-  MaybeNode, Wnode, WnodeSelector, WnodeUtils, WutilFactory
+  MaybeNode, Wnode, WnodeSelector, WnodeExtra, Wdecorator
 } from './types'
 
-export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
-  const utils: WnodeUtils = {
+export const wnodeExtra: Wdecorator<WnodeExtra> = (node: Wnode) => {
+  const extra: WnodeExtra = {
     after(...nodes) {
       if( node.parent === null ) {
         throw Error( 'Cannot insert after root node' )
@@ -42,10 +42,10 @@ export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
         node.firstChild.remove()
       }
 
-      utils.append(...nodes)
+      extra.append(...nodes)
     },
     replaceWith(...nodes) {
-      utils.before(...nodes)
+      extra.before(...nodes)
       node.remove()
     },
     ancestor(selector) {
@@ -78,7 +78,7 @@ export const wnodeUtils: WutilFactory<WnodeUtils> = (node: Wnode) => {
     }
   }
 
-  return utils
+  return extra
 }
 
 export const allIterator = function* (
@@ -109,7 +109,7 @@ export const serialize = (
   return result
 }
 
-export const deserialize = (create = wdoc(wnodeUtils)) =>
+export const deserialize = (create = wdoc(wnodeExtra)) =>
   (value: any[], valueTransformer?: (value: any) => any): Wnode => {
     const node = create(valueTransformer ? valueTransformer(value[0]) : value[0])
 

@@ -1,8 +1,8 @@
 import { stree } from '../symbol-tree/tree'
 import { wsymbol } from './const'
-import { Wnode, WutilFactory } from './types'
+import { Wnode, Wdecorator } from './types'
 
-export const wdoc = <U = {}>(utils?: WutilFactory<U>) => {
+export const wdoc = <U = {}>(decorator?: Wdecorator<U>) => {
   const tree = stree<Wnode>()
 
   const wnode = <T>(value: T) => {
@@ -92,8 +92,8 @@ export const wdoc = <U = {}>(utils?: WutilFactory<U>) => {
 
     tree.initialize(node)
 
-    if ( typeof utils === 'function') {
-      Object.assign(node, utils(node))
+    if ( typeof decorator === 'function') {
+      Object.assign(node, decorator(node))
     }
 
     node[ wsymbol ] = true

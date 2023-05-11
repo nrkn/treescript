@@ -33,7 +33,7 @@ export type WnodeMethods = {
   following: (options?: SincdescOpts<Wnode>) => MaybeNode
 }
 
-export type WnodeUtils = {
+export type WnodeExtra = {
   after: (...nodes: Wnode[]) => void
   append: (...nodes: Wnode[]) => void
   before: (...nodes: Wnode[]) => void
@@ -52,4 +52,4 @@ export type Wnode<T = any> = Readonly<WnodeProps<T>> & WnodeMethods
 
 export type MaybeNode = Wnode | null
 
-export type WutilFactory<T> = ( node: Wnode ) => T
+export type Wdecorator<T> = ( node: Wnode ) => T
